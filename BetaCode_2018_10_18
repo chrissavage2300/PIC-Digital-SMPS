@@ -1,0 +1,75 @@
+#include "mcc_generated_files/mcc.h"
+#define VoltageSetpoint 72
+#define DutyCycleMax 225// 
+#define DutyCycleMin 32 //
+//#define CurrentSetpoint 408 //
+/*
+                         Main application
+ */
+void main(void)
+{
+    //!!!!NOTE: Disconnect power before programming!!!
+    // Initialize the device
+    SYSTEM_Initialize();
+    unsigned int VoltageProcessVar;
+    unsigned int ScaledVoltageProcessVar;
+    //unsigned int CurrentProcessVar;
+    //signed short int VoltageError;
+    unsigned char DutyCycle;
+    DutyCycle=0;
+    ADC1_Initialize();
+    ScaledVoltageProcessVar=0;
+    VoltageProcessVar=0;
+    RED_LED_SetLow();
+            
+    while (1)
+    {
+        
+        VoltageProcessVar=ADC1_GetConversion(VFB); 
+                
+        //EPWM1_LoadDutyValue (VoltageSetpoint);
+        
+        ScaledVoltageProcessVar=((VoltageProcessVar*20)+550)/100;
+        
+        if (ScaledVoltageProcessVar>=72)
+        {
+            RED_LED_SetHigh();    
+            
+        }
+        
+        
+        if (ScaledVoltageProcessVar=VoltageSetpoint)
+        
+        {
+                                        
+          EPWM1_LoadDutyValue(VoltageSetpoint);      
+           
+        }
+        
+        
+        if (ScaledVoltageProcessVar>VoltageSetpoint)
+        
+        {
+            for (DutyCycle=DutyCycleMax;DutyCycle<DutyCycleMax;DutyCycle--)
+            {
+                EPWM1_LoadDutyValue(VoltageSetpoint);
+            }                             
+                
+           
+        }
+        
+        if (ScaledVoltageProcessVar < VoltageSetpoint )
+        {                               
+                //Ramp up duty cycle if it is below the setpoint. WIll ramp
+                //as long as the Process is below the setpoint. 
+                DutyCycle++;
+                //for (DutyCycle=DutyCycleMin;DutyCycle<DutyCycleMax;DutyCycle++)
+                //{
+                //    EPWM1_LoadDutyValue (DutyCycle);
+                //}          
+             EPWM1_LoadDutyValue (DutyCycle);
+        }                             
+           
+        
+    }
+}
